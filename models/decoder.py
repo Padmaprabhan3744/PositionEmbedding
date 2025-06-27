@@ -37,7 +37,7 @@ class DecoderLayer(nn.Module):
         self.norm3 = nn.LayerNorm(d_model)
         self.dropout = nn.Dropout(dropout)
         self.activation = F.relu if activation == "relu" else F.gelu
-
+        self.d_model=d_model
     def forward(self, x, cross, x_mask=None, cross_mask=None):
         device=x.device
         pos=PositionalEmbedding(self.d_model)(x).to(device)
