@@ -42,7 +42,7 @@ class DecoderLayer(nn.Module):
         device=x.device
         pos=PositionalEmbedding(self.d_model)(x).to(device)
         pos=pos.expand(x.shape[0],-1,-1)
-        print(x.shape,pos.shape)
+        #print(x.shape,pos.shape)
         x = x + self.dropout(self.self_attention(
             pos, pos, x,
             attn_mask=x_mask
