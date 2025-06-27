@@ -41,7 +41,7 @@ class FullAttention(nn.Module):
         B, L, H, E = queries.shape
         _, S, _, D = values.shape
         scale = self.scale or 1./sqrt(E)
-        p=PositionalEmbedding(D)(x)
+        p=PositionalEmbedding(D)(queries)
         device=queries.device
         p.expand(B,-1,-1).to(device)
         print(p.shape)
