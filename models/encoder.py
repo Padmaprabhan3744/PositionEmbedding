@@ -66,8 +66,9 @@ class EncoderLayer(nn.Module):
         #     attn_mask = attn_mask
         # ))
         device=x.device
-        pos=PositionEmbedding(self.d_model)(x).to(device)
+        pos=PositionalEmbedding(self.d_model)(x).to(device)
         pos=pos.expand(x.shape[0],-1,-1)
+        print(x.shape,pos.shape)
         new_x, attn = self.attention(
             pos, pos, x,
             attn_mask = attn_mask
