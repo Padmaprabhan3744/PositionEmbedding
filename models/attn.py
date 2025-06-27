@@ -41,11 +41,7 @@ class FullAttention(nn.Module):
         B, L, H, E = queries.shape
         _, S, _, D = values.shape
         scale = self.scale or 1./sqrt(E)
-        p=PositionalEmbedding(D)(queries)
-        device=queries.device
-        p.expand(B,-1,-1).to(device)
-        print(p.shape)
-        scores = torch.einsum("blhe,bshe->bhls", p,p)
+        scores = torch.einsum("blhe,bshe->bhls", queries,keys)
         if self.mask_flag:
             if attn_mask is None:
                 attn_mask = TriangularCausalMask(B, L, device=queries.device)
