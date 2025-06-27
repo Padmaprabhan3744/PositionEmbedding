@@ -7,6 +7,28 @@ import numpy as np
 from math import sqrt
 from utils.masking import TriangularCausalMask, ProbMask
 
+class PositionalEmbedding(nn.Module):
+    def __init__(self, d_model, max_len=5000):
+        super(PositionalEmbedding, self).__init__()
+        # Compute the positional encodings once in log space.
+        pe = torch.zeros(max_len, d_model).float()
+        pe.require_grad = False
+
+        position = torch.arange(0, max_len).float().unsqueeze(1)
+        div_term = (torch.arange(0, d_model, 2).float() * -(math.log(10000.0) / d_model)).exp()
+
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+
+        pe = pe.unsqueeze(0)
+        self.register_buffer('pe', pe)
+
+    def forward(self, x):
+        return self.pe[:, :x.size(1)]
+
+
+
+
 class FullAttention(nn.Module):
     def __init__(self, mask_flag=True, factor=5, scale=None, attention_dropout=0.1, output_attention=False):
         super(FullAttention, self).__init__()
@@ -19,8 +41,11 @@ class FullAttention(nn.Module):
         B, L, H, E = queries.shape
         _, S, _, D = values.shape
         scale = self.scale or 1./sqrt(E)
-
-        scores = torch.einsum("blhe,bshe->bhls", queries, keys)
+        p=PositionalEmbedding(D)(x)
+        device=queries.device
+        p.expand(B,-1,-1).to(device)
+        print(p.shape)
+        scores = torch.einsum("blhe,bshe->bhls", p,p)
         if self.mask_flag:
             if attn_mask is None:
                 attn_mask = TriangularCausalMask(B, L, device=queries.device)
