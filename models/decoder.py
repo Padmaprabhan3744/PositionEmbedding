@@ -40,8 +40,9 @@ class DecoderLayer(nn.Module):
 
     def forward(self, x, cross, x_mask=None, cross_mask=None):
         device=x.device
-        pos=PositionEmbedding(self.d_model)(x).to(device)
+        pos=PositionalEmbedding(self.d_model)(x).to(device)
         pos=pos.expand(x.shape[0],-1,-1)
+        print(x.shape,pos.shape)
         x = x + self.dropout(self.self_attention(
             pos, pos, x,
             attn_mask=x_mask
